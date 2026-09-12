@@ -22,6 +22,8 @@ import { MadiCapabilityExecutor } from '../../core/capabilities/capability.execu
 import { MadiMemoryStore } from '../../core/memory/memory.contract';
 import { MadiReasoningEngine } from '../../core/reasoning/reasoning.engine';
 import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
+import { ResilientReasoningEngine } from '../reasoning/resilient.reasoning.engine';
+import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.reasoning.provider';
 
 @Module({
   imports: [DefaultCapabilitiesModule, DefaultMemoryModule],
@@ -42,6 +44,13 @@ import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
     DefaultAuthorizationPolicy,
     BasicVerifier,
     BasicReasoningEngine,
+    BasicReasoningProvider,
+    {
+      provide: ResilientReasoningEngine,
+      useFactory: (localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) =>
+        new ResilientReasoningEngine([localProvider], fallback),
+      inject: [BasicReasoningProvider, BasicReasoningEngine],
+    },
     {
       provide: MadiAgentPipeline,
       useFactory: (
@@ -54,7 +63,7 @@ import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
         executor: MadiCapabilityExecutor,
         verifier: BasicVerifier,
         memory: MadiMemoryStore,
-        reasoningEngine: BasicReasoningEngine,
+        reasoningEngine: MadiReasoningEngine,
       ) =>
         new MadiAgentPipeline(
           intentResolver,
@@ -78,7 +87,7 @@ import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
         MADI_CAPABILITY_EXECUTOR,
         BasicVerifier,
         MADI_MEMORY_STORE,
-        BasicReasoningEngine,
+        ResilientReasoningEngine,
       ],
     },
     MadiOrchestrator,
