@@ -2,7 +2,7 @@
 
 **Proyecto:** Proyecto M.A.D.I.  
 **Nombre:** Módulo Autónomo de Datos e Inteligencia  
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Estado:** Documento normativo y fuente de verdad del proyecto  
 **Fecha:** 2026-09-12
 
@@ -399,9 +399,54 @@ La voz, el avatar, las animaciones, las expresiones y la presentación visual de
 
 ---
 
+## 15. Identidad por voz y autenticación
+
+### MADI-127 — Reconocimiento de usuarios por voz
+
+M.A.D.I. debe poder reconocer por voz a los usuarios previamente registrados y, cuando la identidad sea confirmada de forma confiable, dirigirse al usuario por su nombre. El reconocimiento de voz es un mecanismo de identificación y no sustituye por sí mismo las reglas de autorización.
+
+### MADI-128 — No identificación por aproximación
+
+M.A.D.I. no debe asignar una identidad cuando la coincidencia de voz sea insuficiente, ambigua o no confiable. Un usuario desconocido o no confirmado no debe ser tratado como un usuario conocido por proximidad de coincidencia.
+
+### MADI-129 — Credencial secundaria
+
+Debe existir un medio secundario de autenticación mediante credencial para que un usuario pueda identificarse cuando falle, sea insuficiente o no pueda utilizarse el reconocimiento de voz. El mecanismo concreto de credencial queda pendiente de definición y no debe inventarse.
+
+### MADI-130 — Separación de identidad y autorización
+
+La identidad reconocida por voz o confirmada mediante credencial debe mantenerse separada de la autorización. Identificar a un usuario no implica conceder automáticamente todos los permisos disponibles para ese usuario.
+
+### MADI-131 — Usuario desconocido o no autorizado
+
+Si M.A.D.I. no puede confirmar la identidad del usuario por los mecanismos disponibles, no debe otorgarle acceso a capacidades protegidas. Debe comunicar de forma natural que la identidad o autorización no pudo ser confirmada y, cuando corresponda, ofrecer el mecanismo de credencial previsto.
+
+---
+
+## 16. Activación por palabra de inicio
+
+### MADI-132 — Wake phrase
+
+M.A.D.I. debe poder activarse mediante la frase de inicio **“Hola M.A.D.I.”**.
+
+### MADI-133 — Wake phrase no autentica
+
+La detección de “Hola M.A.D.I.” únicamente activa la interacción y no constituye autenticación ni autorización del usuario.
+
+### MADI-134 — Saludo inicial natural
+
+Al comenzar una interacción, si la identidad del usuario fue confirmada, M.A.D.I. debe poder responder mediante lenguaje natural y dirigirse al usuario por su nombre, por ejemplo: “¡Hola Miguel! Bienvenido. ¿En qué puedo ayudarte?”. El saludo inicial no debe repetirse innecesariamente durante una conversación ya activa.
+
+### MADI-135 — Activación sin identidad confirmada
+
+Si se detecta la palabra de inicio pero la identidad no está confirmada, M.A.D.I. puede activar la interfaz, pero no debe conceder acceso protegido ni asumir la identidad de un usuario conocido. Debe solicitar la autenticación disponible cuando sea necesaria.
+
+---
+
 ## Registro de cambios
 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1.0 | 2026-09-12 | Creación del Libro Maestro de Reglas de M.A.D.I., consolidando reglas confirmadas provenientes del proyecto SicherERP y de la arquitectura inicial de M.A.D.I. |
 | 1.1 | 2026-09-12 | Incorporación de las reglas confirmadas sobre interfaz de voz en lenguaje natural, presencia visual dinámica, referencia vocal Cortana y separación entre inteligencia e interfaz. |
+| 1.2 | 2026-09-12 | Incorporación de reconocimiento de usuarios por voz, credencial secundaria, separación entre identidad y autorización y activación mediante “Hola M.A.D.I.”. |
