@@ -16,7 +16,7 @@ export class NaturalWakePhraseDetector {
     const normalized = this.normalize(text);
     const name = this.normalize(MADI_WAKE_NAME);
 
-    if (!normalized.includes(name)) {
+    if (!this.containsNameToken(normalized, name)) {
       return { detected: false };
     }
 
@@ -29,12 +29,15 @@ export class NaturalWakePhraseDetector {
 
   async detect(audio: Uint8Array, audioFormat: string): Promise<MadiWakePhraseDetectionResult> {
     if (!this.detector) {
-      return {
-        detected: false,
-      };
+      return { detected: false };
     }
 
     return this.detector.detect(audio, audioFormat);
+  }
+
+  private containsNameToken(text: string, name: string): boolean {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(?:^|\\s)${escaped}(?:$|\\s)`).test(text);
   }
 
   private normalize(value: string): string {
