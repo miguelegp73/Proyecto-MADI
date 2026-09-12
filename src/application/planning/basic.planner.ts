@@ -1,4 +1,4 @@
-import { MadiPlan, MadiPlanner, MadiPlanningInput } from './planning.contract';
+import { MadiPlan, MadiPlanner, MadiPlanningInput } from '../../core/planning/planning.contract';
 
 export class BasicPlanner implements MadiPlanner {
   async plan(input: MadiPlanningInput): Promise<MadiPlan> {
