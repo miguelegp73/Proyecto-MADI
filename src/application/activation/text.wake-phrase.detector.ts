@@ -9,7 +9,7 @@ export class TextWakePhraseDetector {
     const normalized = this.normalize(text);
     const name = this.normalize(MADI_WAKE_NAME);
 
-    if (!normalized.includes(name)) {
+    if (!this.containsNameToken(normalized, name)) {
       return { detected: false };
     }
 
@@ -21,11 +21,16 @@ export class TextWakePhraseDetector {
     const name = this.normalize(MADI_WAKE_NAME);
     const index = normalized.indexOf(name);
 
-    if (index < 0) return normalized;
+    if (!this.containsNameToken(normalized, name) || index < 0) return normalized;
 
     return `${normalized.slice(0, index)} ${normalized.slice(index + name.length)}`
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  private containsNameToken(text: string, name: string): boolean {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(?:^|\\s)${escaped}(?:$|\\s)`).test(text);
   }
 
   private normalize(value: string): string {
