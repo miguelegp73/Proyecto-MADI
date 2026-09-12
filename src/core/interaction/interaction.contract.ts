@@ -29,6 +29,7 @@ export interface MadiInteractionResponse {
   requestId: string;
   timestamp: string;
   status: InteractionStatus;
+  responseText?: string;
   data?: unknown[];
   inferences?: unknown[];
   conclusions?: unknown[];
