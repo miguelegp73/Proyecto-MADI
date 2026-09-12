@@ -1,0 +1,1 @@
+export const MADI_REASONING_PORT = Symbol('MADI_REASONING_PORT');
