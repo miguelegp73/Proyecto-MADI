@@ -8,13 +8,37 @@ M.A.D.I. se construirá como un sistema independiente de inteligencia y asistenc
 
 ```text
 src/
-├── core/          # dominio y capacidades centrales de M.A.D.I.
+├── core/          # dominio y contratos centrales de M.A.D.I.
 ├── application/   # casos de uso y orquestación
 ├── infrastructure/# proveedores externos, persistencia e integraciones
 └── interfaces/    # HTTP y futuras interfaces de usuario
 ```
 
 La estructura se ampliará solamente cuando exista una necesidad funcional real.
+
+## Límites actuales
+
+```text
+Interfaz de voz
+    │
+    ├── Wake phrase: “Hola M.A.D.I.”
+    │       └── activa la interacción; no autentica
+    │
+    ├── STT
+    │
+    └── Identidad por voz
+            ├── identificado de forma confiable → identidad
+            ├── ambiguo/desconocido → no asumir identidad
+            └── fallo/no disponibilidad → credencial secundaria
+                                      │
+                                      ▼
+                                autorización
+                                      │
+                                      ▼
+                         Interaction / Agent Pipeline
+```
+
+La identidad, la autenticación y la autorización son conceptos separados. Los contratos de reconocimiento de voz y credenciales permanecen en `core`; sus proveedores concretos permanecen fuera del núcleo.
 
 ## Primer objetivo técnico
 
@@ -27,3 +51,6 @@ El primer incremento debe demostrar que la aplicación puede arrancar y responde
 3. Cada capacidad nueva tendrá una responsabilidad clara y una prueba asociada.
 4. No se agregará infraestructura por anticipado sin una necesidad concreta.
 5. Cada estado funcional se conservará mediante commits pequeños y descriptivos.
+6. La activación por palabra de inicio nunca equivale a autenticación.
+7. La identificación por voz no concede permisos por sí misma.
+8. Una identidad ambigua o insuficientemente confiable nunca debe resolverse por aproximación.
