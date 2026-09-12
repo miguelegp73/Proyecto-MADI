@@ -3,6 +3,8 @@ export interface MadiPlanStep {
   description: string;
   capabilityId?: string;
   operation?: string;
+  input?: Record<string, unknown>;
+  expected?: unknown;
   requiresAuthorization: boolean;
 }
 
