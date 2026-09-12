@@ -2,9 +2,17 @@ import { BadRequestException } from '@nestjs/common';
 import { InteractionController } from './interaction.controller';
 import { InteractionService } from '../../application/interaction/interaction.service';
 import { MadiInteractionRequest } from '../../core/interaction/interaction.contract';
+import { MadiOrchestrator } from '../../application/orchestration/madi.orchestrator';
 
 describe('InteractionController', () => {
-  const service = new InteractionService();
+  const orchestrator = {
+    execute: jest.fn().mockResolvedValue({
+      requestId: 'test-request-002',
+      timestamp: '2026-09-12T16:00:00.000Z',
+      status: 'completed',
+    }),
+  } as unknown as MadiOrchestrator;
+  const service = new InteractionService(orchestrator);
   const controller = new InteractionController(service);
 
   const validRequest: MadiInteractionRequest = {
@@ -20,8 +28,8 @@ describe('InteractionController', () => {
     },
   };
 
-  it('accepts a valid interaction request', () => {
-    expect(controller.handle(validRequest)).toMatchObject({
+  it('accepts a valid interaction request', async () => {
+    await expect(controller.handle(validRequest)).resolves.toMatchObject({
       requestId: 'test-request-002',
       status: 'completed',
     });
