@@ -10,6 +10,7 @@ import { MadiCapabilityExecutor } from '../../core/capabilities/capability.execu
 import { MadiCapabilitySelector } from '../../core/capabilities/capability.selector';
 import { MadiAuthorizationPolicy } from '../../core/authorization/authorization.contract';
 import { MadiVerifier } from '../../core/verification/verification.contract';
+import { MadiMemoryStore } from '../../core/memory/memory.contract';
 
 export interface MadiAgentPipelineResult extends MadiInteractionResponse {
   intent?: unknown;
@@ -28,16 +29,19 @@ export class MadiAgentPipeline {
     private readonly authorizationPolicy: MadiAuthorizationPolicy,
     private readonly executor: MadiCapabilityExecutor,
     private readonly verifier: MadiVerifier,
+    private readonly memory?: MadiMemoryStore,
   ) {}
 
   async process(request: MadiInteractionRequest): Promise<MadiAgentPipelineResult> {
     try {
       const intent = await this.intentResolver.resolve(request.input.content);
       if (intent.requiresClarification) {
-        return this.result(request, 'needs_input', {
+        const result = this.result(request, 'needs_input', {
           intent,
           warnings: ['Se requiere aclaración antes de planificar.'],
         });
+        await this.rememberInteraction(request, result);
+        return result;
       }
 
       const context = await this.contextManager.build(request.context);
@@ -49,7 +53,7 @@ export class MadiAgentPipeline {
 
       for (const step of plan.steps) {
         if (!step.capabilityId) {
-          return this.result(request, 'failed', {
+          const result = this.result(request, 'failed', {
             intent,
             context,
             plan,
@@ -59,6 +63,8 @@ export class MadiAgentPipeline {
               message: `El paso '${step.id}' no define una capacidad ejecutable.`,
             },
           });
+          await this.rememberInteraction(request, result);
+          return result;
         }
 
         const selection = await this.capabilitySelector.select(
@@ -68,7 +74,7 @@ export class MadiAgentPipeline {
         );
 
         if (!selection.capabilityId) {
-          return this.result(request, 'failed', {
+          const result = this.result(request, 'failed', {
             intent,
             context,
             plan,
@@ -78,11 +84,13 @@ export class MadiAgentPipeline {
               message: selection.reason,
             },
           });
+          await this.rememberInteraction(request, result);
+          return result;
         }
 
         const capability = this.capabilityRegistry.get(selection.capabilityId);
         if (!capability) {
-          return this.result(request, 'failed', {
+          const result = this.result(request, 'failed', {
             intent,
             context,
             plan,
@@ -92,6 +100,8 @@ export class MadiAgentPipeline {
               message: `La capacidad '${selection.capabilityId}' no está disponible.`,
             },
           });
+          await this.rememberInteraction(request, result);
+          return result;
         }
 
         const operation = step.operation ?? 'execute';
@@ -103,7 +113,7 @@ export class MadiAgentPipeline {
         });
 
         if (authorization.decision !== 'allowed') {
-          return this.result(request, 'needs_authorization', {
+          const result = this.result(request, 'needs_authorization', {
             intent,
             context,
             plan,
@@ -113,6 +123,8 @@ export class MadiAgentPipeline {
               reason: authorization.reason,
             },
           });
+          await this.rememberInteraction(request, result);
+          return result;
         }
 
         const actual = await this.executor.execute({
@@ -124,7 +136,7 @@ export class MadiAgentPipeline {
 
         if (!actual.success) {
           execution.push({ stepId: step.id, capabilityId: capability.id, result: actual });
-          return this.result(request, 'failed', {
+          const result = this.result(request, 'failed', {
             intent,
             context,
             plan,
@@ -134,6 +146,8 @@ export class MadiAgentPipeline {
               message: 'La capacidad no pudo completar la operación.',
             },
           });
+          await this.rememberInteraction(request, result);
+          return result;
         }
 
         const verification = await this.verifier.verify({
@@ -151,7 +165,7 @@ export class MadiAgentPipeline {
         });
 
         if (!verification.verified) {
-          return this.result(request, 'failed', {
+          const result = this.result(request, 'failed', {
             intent,
             context,
             plan,
@@ -161,18 +175,71 @@ export class MadiAgentPipeline {
               message: verification.reason ?? 'La ejecución no pudo verificarse.',
             },
           });
+          await this.rememberInteraction(request, result);
+          return result;
         }
       }
 
-      return this.result(request, 'completed', { intent, context, plan, execution });
+      const result = this.result(request, 'completed', { intent, context, plan, execution });
+      await this.rememberInteraction(request, result);
+      return result;
     } catch (error) {
-      return this.result(request, 'failed', {
+      const result = this.result(request, 'failed', {
         error: {
           code: 'PIPELINE_ERROR',
           message: error instanceof Error ? error.message : 'Error inesperado en el pipeline.',
         },
       });
+      await this.rememberInteraction(request, result);
+      return result;
     }
+  }
+
+  private async rememberInteraction(
+    request: MadiInteractionRequest,
+    response: MadiAgentPipelineResult,
+  ): Promise<void> {
+    if (!this.memory) {
+      return;
+    }
+
+    const scope = this.scopeFromRequest(request);
+    if (!scope) {
+      return;
+    }
+
+    await this.memory.remember({
+      id: request.requestId,
+      scope,
+      kind: 'interaction',
+      content: request.input.content,
+      timestamp: request.timestamp,
+      metadata: {
+        status: response.status,
+        intent: response.intent,
+      },
+    });
+  }
+
+  private scopeFromRequest(request: MadiInteractionRequest): string | undefined {
+    const context = request.context ?? {};
+    const conversationId = context.conversationId;
+    const sessionId = context.sessionId;
+    const userId = context.userId;
+
+    if (typeof conversationId === 'string' && conversationId.trim()) {
+      return `conversation:${conversationId}`;
+    }
+
+    if (typeof sessionId === 'string' && sessionId.trim()) {
+      return `session:${sessionId}`;
+    }
+
+    if (typeof userId === 'string' && userId.trim()) {
+      return `user:${userId}`;
+    }
+
+    return undefined;
   }
 
   private result(
