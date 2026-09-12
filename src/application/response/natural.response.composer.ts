@@ -16,6 +16,12 @@ export class NaturalResponseComposer {
       const value = output as Record<string, unknown>;
       if (typeof value.text === 'string') return value.text;
       if (typeof value.status === 'string' && typeof value.name === 'string') return `${value.name} está ${value.status}.`;
+      if (Array.isArray(output)) {
+        const items = output as Array<Record<string, unknown>>;
+        if (items.length && items.every((item) => typeof item.name === 'string')) {
+          return `Tengo ${items.length} capacidades registradas: ${items.map((item) => item.name as string).join(', ')}.`;
+        }
+      }
     }
 
     const conclusions = result.conclusions ?? [];
