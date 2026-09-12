@@ -13,11 +13,7 @@ import { DefaultAuthorizationPolicy } from '../authorization/default.authorizati
 import { BasicVerifier } from '../verification/basic.verifier';
 import { MadiAgentPipeline } from '../pipeline/madi.agent.pipeline';
 import { DefaultMemoryModule, MADI_MEMORY_STORE } from '../memory/default.memory.module';
-import {
-  DefaultCapabilitiesModule,
-  MADI_CAPABILITY_EXECUTOR,
-  MADI_CAPABILITY_REGISTRY,
-} from '../capabilities/default.capabilities.module';
+import { DefaultCapabilitiesModule, MADI_CAPABILITY_EXECUTOR, MADI_CAPABILITY_REGISTRY } from '../capabilities/default.capabilities.module';
 import { MadiCapabilityRegistry } from '../../core/capabilities/capability.registry';
 import { MadiCapabilityExecutor } from '../../core/capabilities/capability.executor';
 import { MadiMemoryStore } from '../../core/memory/memory.contract';
@@ -25,6 +21,7 @@ import { MadiReasoningEngine } from '../../core/reasoning/reasoning.engine';
 import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
 import { ResilientReasoningEngine } from '../reasoning/resilient.reasoning.engine';
 import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.reasoning.provider';
+import { OpenRouterReasoningProvider } from '../../infrastructure/reasoning/openrouter.reasoning.provider';
 import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway';
 
 @Module({
@@ -40,7 +37,13 @@ import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway
     BasicVerifier,
     BasicReasoningEngine,
     BasicReasoningProvider,
-    { provide: ResilientReasoningEngine, useFactory: (localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) => new ResilientReasoningEngine([localProvider], fallback), inject: [BasicReasoningProvider, BasicReasoningEngine] },
+    OpenRouterReasoningProvider,
+    {
+      provide: ResilientReasoningEngine,
+      useFactory: (openRouter: OpenRouterReasoningProvider, localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) =>
+        new ResilientReasoningEngine([openRouter, localProvider], fallback),
+      inject: [OpenRouterReasoningProvider, BasicReasoningProvider, BasicReasoningEngine],
+    },
     {
       provide: MadiAgentPipeline,
       useFactory: (intentResolver: BasicIntentResolver, contextManager: DefaultContextManager, planner: BasicPlanner, registry: MadiCapabilityRegistry, selector: BasicCapabilitySelector, authorization: DefaultAuthorizationPolicy, executor: MadiCapabilityExecutor, verifier: BasicVerifier, memory: MadiMemoryStore, reasoningEngine: MadiReasoningEngine) => new MadiAgentPipeline(intentResolver, contextManager, planner, registry, selector, authorization, executor, verifier, memory, reasoningEngine),
