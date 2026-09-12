@@ -1,0 +1,4 @@
+{
+  "collection": "src/**/*.ts",
+  "sourceRoot": "src"
+}
