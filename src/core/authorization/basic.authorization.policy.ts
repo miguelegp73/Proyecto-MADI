@@ -1,13 +1,30 @@
-import { MadiAuthorizationRequest, MadiAuthorizationDecision, MadiAuthorizationPolicy } from './authorization.contract';
+import {
+  MadiAuthorizationPolicy,
+  MadiAuthorizationRequest,
+  MadiAuthorizationResult,
+} from './authorization.contract';
 
 export class BasicAuthorizationPolicy implements MadiAuthorizationPolicy {
-  async decide(request: MadiAuthorizationRequest): Promise<MadiAuthorizationDecision> {
-    if (!request.requiresAuthorization) {
-      return { allowed: true, reason: 'La operación no requiere autorización adicional.' };
+  async authorize(
+    request: MadiAuthorizationRequest,
+  ): Promise<MadiAuthorizationResult> {
+    if (request.risk === 'low') {
+      return {
+        decision: 'allowed',
+        reason: 'La operación de bajo riesgo no requiere autorización adicional.',
+      };
     }
-    if (request.authorizationToken) {
-      return { allowed: true, reason: 'Se recibió un token de autorización.' };
+
+    if (request.token) {
+      return {
+        decision: 'allowed',
+        reason: 'Se recibió un token de autorización.',
+      };
     }
-    return { allowed: false, reason: 'La operación requiere autorización.' };
+
+    return {
+      decision: 'required',
+      reason: 'La operación requiere autorización explícita.',
+    };
   }
 }
