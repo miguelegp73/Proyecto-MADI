@@ -20,6 +20,8 @@ import {
 import { MadiCapabilityRegistry } from '../../core/capabilities/capability.registry';
 import { MadiCapabilityExecutor } from '../../core/capabilities/capability.executor';
 import { MadiMemoryStore } from '../../core/memory/memory.contract';
+import { MadiReasoningEngine } from '../../core/reasoning/reasoning.engine';
+import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
 
 @Module({
   imports: [DefaultCapabilitiesModule, DefaultMemoryModule],
@@ -39,6 +41,7 @@ import { MadiMemoryStore } from '../../core/memory/memory.contract';
     BasicCapabilitySelector,
     DefaultAuthorizationPolicy,
     BasicVerifier,
+    BasicReasoningEngine,
     {
       provide: MadiAgentPipeline,
       useFactory: (
@@ -51,6 +54,7 @@ import { MadiMemoryStore } from '../../core/memory/memory.contract';
         executor: MadiCapabilityExecutor,
         verifier: BasicVerifier,
         memory: MadiMemoryStore,
+        reasoningEngine: BasicReasoningEngine,
       ) =>
         new MadiAgentPipeline(
           intentResolver,
@@ -62,6 +66,7 @@ import { MadiMemoryStore } from '../../core/memory/memory.contract';
           executor,
           verifier,
           memory,
+          reasoningEngine,
         ),
       inject: [
         BasicIntentResolver,
@@ -73,6 +78,7 @@ import { MadiMemoryStore } from '../../core/memory/memory.contract';
         MADI_CAPABILITY_EXECUTOR,
         BasicVerifier,
         MADI_MEMORY_STORE,
+        BasicReasoningEngine,
       ],
     },
     MadiOrchestrator,
