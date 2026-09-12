@@ -24,6 +24,7 @@ import { MadiReasoningEngine } from '../../core/reasoning/reasoning.engine';
 import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
 import { ResilientReasoningEngine } from '../reasoning/resilient.reasoning.engine';
 import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.reasoning.provider';
+import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway';
 
 @Module({
   imports: [DefaultCapabilitiesModule, DefaultMemoryModule],
@@ -92,7 +93,13 @@ import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.rea
     },
     MadiOrchestrator,
     InteractionService,
+    {
+      provide: ApplicationInterfaceGateway,
+      useFactory: (interactionService: InteractionService) =>
+        new ApplicationInterfaceGateway(interactionService),
+      inject: [InteractionService],
+    },
   ],
-  exports: [InteractionService],
+  exports: [InteractionService, ApplicationInterfaceGateway],
 })
 export class InteractionModule {}
