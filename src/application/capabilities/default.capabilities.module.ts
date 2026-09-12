@@ -3,6 +3,7 @@ import { MadiCapabilityRegistry } from '../../core/capabilities/capability.regis
 import { RegistryCapabilityExecutor } from '../../core/capabilities/capability.executor';
 import { MadiStatusCapability } from '../../core/capabilities/madi.status.capability';
 import { MadiTimeCapability } from '../../core/capabilities/madi.time.capability';
+import { MadiCapabilitiesCapability } from '../../core/capabilities/madi.capabilities.capability';
 
 export const MADI_CAPABILITY_REGISTRY = Symbol('MADI_CAPABILITY_REGISTRY');
 export const MADI_CAPABILITY_EXECUTOR = Symbol('MADI_CAPABILITY_EXECUTOR');
@@ -15,6 +16,7 @@ export const MADI_CAPABILITY_EXECUTOR = Symbol('MADI_CAPABILITY_EXECUTOR');
         const registry = new MadiCapabilityRegistry();
         registry.register(new MadiStatusCapability());
         registry.register(new MadiTimeCapability());
+        registry.register(new MadiCapabilitiesCapability(registry));
         return registry;
       },
     },
