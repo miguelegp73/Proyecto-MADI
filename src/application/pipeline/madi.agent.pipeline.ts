@@ -11,10 +11,15 @@ import { MadiCapabilitySelector } from '../../core/capabilities/capability.selec
 import { MadiAuthorizationPolicy } from '../../core/authorization/authorization.contract';
 import { MadiVerifier } from '../../core/verification/verification.contract';
 import { MadiMemoryStore } from '../../core/memory/memory.contract';
+import {
+  MadiReasoningEngine,
+  MadiReasoningResult,
+} from '../../core/reasoning/reasoning.engine';
 
 export interface MadiAgentPipelineResult extends MadiInteractionResponse {
   intent?: unknown;
   context?: unknown;
+  reasoning?: MadiReasoningResult;
   plan?: unknown;
   execution?: unknown[];
 }
@@ -30,6 +35,7 @@ export class MadiAgentPipeline {
     private readonly executor: MadiCapabilityExecutor,
     private readonly verifier: MadiVerifier,
     private readonly memory?: MadiMemoryStore,
+    private readonly reasoningEngine?: MadiReasoningEngine,
   ) {}
 
   async process(request: MadiInteractionRequest): Promise<MadiAgentPipelineResult> {
@@ -45,9 +51,13 @@ export class MadiAgentPipeline {
       }
 
       const context = await this.contextManager.build(request.context);
+      const reasoning = this.reasoningEngine
+        ? await this.reasoningEngine.reason({ request, intent, context })
+        : undefined;
+
       const plan = await this.planner.plan({
         goal: request.input.content,
-        context: { ...context.values, intent },
+        context: { ...context.values, intent, reasoning },
       });
       const execution: unknown[] = [];
 
@@ -56,6 +66,7 @@ export class MadiAgentPipeline {
           const result = this.result(request, 'failed', {
             intent,
             context,
+            reasoning,
             plan,
             execution,
             error: {
@@ -77,6 +88,7 @@ export class MadiAgentPipeline {
           const result = this.result(request, 'failed', {
             intent,
             context,
+            reasoning,
             plan,
             execution,
             error: {
@@ -93,6 +105,7 @@ export class MadiAgentPipeline {
           const result = this.result(request, 'failed', {
             intent,
             context,
+            reasoning,
             plan,
             execution,
             error: {
@@ -116,6 +129,7 @@ export class MadiAgentPipeline {
           const result = this.result(request, 'needs_authorization', {
             intent,
             context,
+            reasoning,
             plan,
             execution,
             authorization: {
@@ -139,6 +153,7 @@ export class MadiAgentPipeline {
           const result = this.result(request, 'failed', {
             intent,
             context,
+            reasoning,
             plan,
             execution,
             error: actual.error ?? {
@@ -168,6 +183,7 @@ export class MadiAgentPipeline {
           const result = this.result(request, 'failed', {
             intent,
             context,
+            reasoning,
             plan,
             execution,
             error: {
@@ -180,7 +196,13 @@ export class MadiAgentPipeline {
         }
       }
 
-      const result = this.result(request, 'completed', { intent, context, plan, execution });
+      const result = this.result(request, 'completed', {
+        intent,
+        context,
+        reasoning,
+        plan,
+        execution,
+      });
       await this.rememberInteraction(request, result);
       return result;
     } catch (error) {
