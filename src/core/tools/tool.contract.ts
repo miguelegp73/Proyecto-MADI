@@ -1,7 +1,10 @@
+export type MadiToolRisk = 'low' | 'moderate' | 'high';
+
 export interface MadiToolRequest {
   toolId: string;
   operation: string;
   input?: Record<string, unknown>;
+  authorizationToken?: string;
 }
 
 export interface MadiToolResult {
@@ -15,6 +18,8 @@ export interface MadiTool {
   id: string;
   name: string;
   description: string;
-  risk: 'low' | 'moderate' | 'high';
+  risk: MadiToolRisk;
+  /** If present, only these operations may be executed through the tool boundary. */
+  operations?: readonly string[];
   execute(request: MadiToolRequest): Promise<MadiToolResult>;
 }
