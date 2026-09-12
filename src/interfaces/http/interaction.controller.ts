@@ -14,7 +14,7 @@ export class InteractionController {
   @Post()
   handle(@Body() request: MadiInteractionRequest) {
     this.validate(request);
-    return this.interactionService.handle(request);
+    return this.interactionService.execute(request);
   }
 
   private validate(request: MadiInteractionRequest): void {
