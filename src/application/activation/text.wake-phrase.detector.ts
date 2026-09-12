@@ -1,30 +1,31 @@
 import {
-  MADI_WAKE_PHRASE,
+  MADI_WAKE_NAME,
   MadiWakePhraseDetectionResult,
 } from '../../core/activation/wake-phrase.contract';
 
-/** Text-side adapter used by browser STT until a real audio wake-word provider is selected. */
+/** Text/STT adapter for natural activation phrases addressed to M.A.D.I. */
 export class TextWakePhraseDetector {
   detectText(text: string): MadiWakePhraseDetectionResult {
     const normalized = this.normalize(text);
-    const phrase = this.normalize(MADI_WAKE_PHRASE);
+    const name = this.normalize(MADI_WAKE_NAME);
 
-    if (!normalized.includes(phrase)) {
+    if (!normalized.includes(name)) {
       return { detected: false };
     }
 
-    return { detected: true, phrase: MADI_WAKE_PHRASE, confidence: 1 };
+    return { detected: true, phrase: text.trim(), confidence: 1 };
   }
 
   removeWakePhrase(text: string): string {
-    const phrase = this.normalize(MADI_WAKE_PHRASE);
-    let normalized = this.normalize(text);
+    const normalized = this.normalize(text);
+    const name = this.normalize(MADI_WAKE_NAME);
+    const index = normalized.indexOf(name);
 
-    if (normalized.startsWith(phrase)) {
-      normalized = normalized.slice(phrase.length).trim();
-    }
+    if (index < 0) return normalized;
 
-    return normalized;
+    return `${normalized.slice(0, index)} ${normalized.slice(index + name.length)}`
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   private normalize(value: string): string {
@@ -32,6 +33,7 @@ export class TextWakePhraseDetector {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
+      .replace(/[.,!?;:]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
