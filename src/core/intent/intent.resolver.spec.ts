@@ -12,6 +12,15 @@ describe('BasicIntentResolver', () => {
     });
   });
 
+  it('classifies a local time request', async () => {
+    await expect(resolver.resolve('M.A.D.I., ¿qué hora es?')).resolves.toEqual({
+      name: 'information.time',
+      domain: 'information',
+      confidence: 0.96,
+      requiresClarification: false,
+    });
+  });
+
   it('requests clarification for empty input', async () => {
     await expect(resolver.resolve('   ')).resolves.toEqual({
       name: 'unknown.empty',
