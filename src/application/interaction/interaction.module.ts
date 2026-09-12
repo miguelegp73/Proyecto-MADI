@@ -23,9 +23,11 @@ import { ResilientReasoningEngine } from '../reasoning/resilient.reasoning.engin
 import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.reasoning.provider';
 import { OpenRouterReasoningProvider } from '../../infrastructure/reasoning/openrouter.reasoning.provider';
 import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway';
+import { NaturalResponseComposer } from '../response/natural.response.composer';
+import { ConversationModule } from '../conversation/conversation.module';
 
 @Module({
-  imports: [DefaultCapabilitiesModule, DefaultMemoryModule],
+  imports: [DefaultCapabilitiesModule, DefaultMemoryModule, ConversationModule],
   controllers: [InteractionController, MadiVoiceUiController],
   providers: [
     { provide: MADI_REASONING_PORT, useClass: StubReasoningAdapter },
@@ -38,10 +40,10 @@ import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway
     BasicReasoningEngine,
     BasicReasoningProvider,
     OpenRouterReasoningProvider,
+    NaturalResponseComposer,
     {
       provide: ResilientReasoningEngine,
-      useFactory: (openRouter: OpenRouterReasoningProvider, localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) =>
-        new ResilientReasoningEngine([openRouter, localProvider], fallback),
+      useFactory: (openRouter: OpenRouterReasoningProvider, localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) => new ResilientReasoningEngine([openRouter, localProvider], fallback),
       inject: [OpenRouterReasoningProvider, BasicReasoningProvider, BasicReasoningEngine],
     },
     {
@@ -50,7 +52,11 @@ import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway
       inject: [BasicIntentResolver, DefaultContextManager, BasicPlanner, MADI_CAPABILITY_REGISTRY, BasicCapabilitySelector, DefaultAuthorizationPolicy, MADI_CAPABILITY_EXECUTOR, BasicVerifier, MADI_MEMORY_STORE, ResilientReasoningEngine],
     },
     MadiOrchestrator,
-    InteractionService,
+    {
+      provide: InteractionService,
+      useFactory: (orchestrator: MadiOrchestrator, composer: NaturalResponseComposer) => new InteractionService(orchestrator, composer),
+      inject: [MadiOrchestrator, NaturalResponseComposer],
+    },
     { provide: ApplicationInterfaceGateway, useFactory: (interactionService: InteractionService) => new ApplicationInterfaceGateway(interactionService), inject: [InteractionService] },
   ],
   exports: [InteractionService, ApplicationInterfaceGateway],
