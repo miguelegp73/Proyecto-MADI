@@ -7,15 +7,14 @@ export class BasicPlanner implements MadiPlanner {
     if (intent?.name === 'information.madi.status') {
       return {
         goal: input.goal,
-        steps: [
-          {
-            id: 'status-001',
-            description: 'Consultar el estado operativo de M.A.D.I.',
-            capabilityId: 'madi.status',
-            operation: 'execute',
-            requiresAuthorization: false,
-          },
-        ],
+        steps: [{ id: 'status-001', description: 'Consultar el estado operativo de M.A.D.I.', capabilityId: 'madi.status', operation: 'execute', requiresAuthorization: false }],
+      };
+    }
+
+    if (intent?.name === 'information.time') {
+      return {
+        goal: input.goal,
+        steps: [{ id: 'time-001', description: 'Consultar la hora local.', capabilityId: 'system.time', operation: 'execute', requiresAuthorization: false }],
       };
     }
 
