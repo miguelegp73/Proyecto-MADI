@@ -2,8 +2,8 @@
 
 **Proyecto:** Proyecto M.A.D.I.  
 **Nombre:** Módulo Autónomo de Datos e Inteligencia  
-**Versión:** 1.0  
-**Estado:** Documento normativo inicial y fuente de verdad del proyecto  
+**Versión:** 1.1  
+**Estado:** Documento normativo y fuente de verdad del proyecto  
 **Fecha:** 2026-09-12
 
 ## Propósito
@@ -379,16 +379,29 @@ Nunca se debe sacrificar un estado funcional existente para avanzar más rápido
 
 ---
 
+## 14. Interfaz de voz y presencia visual
+
+### MADI-123 — Interfaz de voz en lenguaje natural
+
+M.A.D.I. debe disponer de una interfaz de voz que permita al usuario comunicarse con ella mediante lenguaje natural. La interfaz de voz debe ser una capa consumidora del núcleo de M.A.D.I. y no una dependencia del núcleo.
+
+### MADI-124 — Identidad visual dinámica
+
+Cuando el usuario se comunique con M.A.D.I. mediante la interfaz visual, debe existir un avatar inspirado visualmente en la referencia proporcionada por el usuario: rostro femenino holográfico de estética tecnológica/cian, presentado de forma dinámica. El rostro debe poder realizar movimientos y expresiones durante la interacción, especialmente mientras M.A.D.I. habla.
+
+### MADI-125 — Referencia de voz deseada
+
+La voz de M.A.D.I. debe buscar una identidad vocal equivalente a la de Cortana, la inteligencia artificial de la franquicia HALO, como referencia estética y funcional. La implementación concreta queda sujeta a la disponibilidad tecnológica y a las condiciones de uso/licenciamiento aplicables; no se debe acoplar el núcleo a un proveedor de voz específico.
+
+### MADI-126 — Separación entre inteligencia y presencia
+
+La voz, el avatar, las animaciones, las expresiones y la presentación visual de M.A.D.I. pertenecen a la capa de interfaz. No deben modificar ni condicionar el contrato semántico del núcleo.
+
+---
+
 ## Registro de cambios
 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1.0 | 2026-09-12 | Creación del Libro Maestro de Reglas de M.A.D.I., consolidando reglas confirmadas provenientes del proyecto SicherERP y de la arquitectura inicial de M.A.D.I. |
-
----
-
-## Estado actual
-
-**v0.1 — Fundación técnica.**
-
-El repositorio ya cuenta con una arquitectura inicial separada por `core`, `application`, `infrastructure` e `interfaces`, y el primer objetivo técnico es disponer de un núcleo ejecutable con comprobación de salud antes de incorporar IA, memoria o herramientas.
+| 1.1 | 2026-09-12 | Incorporación de las reglas confirmadas sobre interfaz de voz en lenguaje natural, presencia visual dinámica, referencia vocal Cortana y separación entre inteligencia e interfaz. |
