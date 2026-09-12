@@ -11,6 +11,7 @@ import { BasicCapabilitySelector } from '../../core/capabilities/capability.sele
 import { DefaultAuthorizationPolicy } from '../authorization/default.authorization.policy';
 import { BasicVerifier } from '../verification/basic.verifier';
 import { MadiAgentPipeline } from '../pipeline/madi.agent.pipeline';
+import { DefaultMemoryModule, MADI_MEMORY_STORE } from '../memory/default.memory.module';
 import {
   DefaultCapabilitiesModule,
   MADI_CAPABILITY_EXECUTOR,
@@ -18,9 +19,10 @@ import {
 } from '../capabilities/default.capabilities.module';
 import { MadiCapabilityRegistry } from '../../core/capabilities/capability.registry';
 import { MadiCapabilityExecutor } from '../../core/capabilities/capability.executor';
+import { MadiMemoryStore } from '../../core/memory/memory.contract';
 
 @Module({
-  imports: [DefaultCapabilitiesModule],
+  imports: [DefaultCapabilitiesModule, DefaultMemoryModule],
   controllers: [InteractionController],
   providers: [
     {
@@ -28,7 +30,11 @@ import { MadiCapabilityExecutor } from '../../core/capabilities/capability.execu
       useClass: StubReasoningAdapter,
     },
     BasicIntentResolver,
-    DefaultContextManager,
+    {
+      provide: DefaultContextManager,
+      useFactory: (memory: MadiMemoryStore) => new DefaultContextManager(memory),
+      inject: [MADI_MEMORY_STORE],
+    },
     BasicPlanner,
     BasicCapabilitySelector,
     DefaultAuthorizationPolicy,
@@ -44,6 +50,7 @@ import { MadiCapabilityExecutor } from '../../core/capabilities/capability.execu
         authorization: DefaultAuthorizationPolicy,
         executor: MadiCapabilityExecutor,
         verifier: BasicVerifier,
+        memory: MadiMemoryStore,
       ) =>
         new MadiAgentPipeline(
           intentResolver,
@@ -54,6 +61,7 @@ import { MadiCapabilityExecutor } from '../../core/capabilities/capability.execu
           authorization,
           executor,
           verifier,
+          memory,
         ),
       inject: [
         BasicIntentResolver,
@@ -64,6 +72,7 @@ import { MadiCapabilityExecutor } from '../../core/capabilities/capability.execu
         DefaultAuthorizationPolicy,
         MADI_CAPABILITY_EXECUTOR,
         BasicVerifier,
+        MADI_MEMORY_STORE,
       ],
     },
     MadiOrchestrator,
