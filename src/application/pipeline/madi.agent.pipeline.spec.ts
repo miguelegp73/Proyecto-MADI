@@ -28,23 +28,6 @@ function capability(requiresAuthorization = false): MadiCapability {
   };
 }
 
-function createPipeline(overrides: Partial<ConstructorParameters<typeof MadiAgentPipeline>[0]> = {}) {
-  const registry = new MadiCapabilityRegistry();
-  return {
-    registry,
-    pipeline: new MadiAgentPipeline(
-      overrides as never,
-      {} as never,
-      {} as never,
-      registry,
-      {} as never,
-      {} as never,
-      {} as never,
-      {} as never,
-    ),
-  };
-}
-
 describe('MadiAgentPipeline', () => {
   it('requests clarification before building context or executing', async () => {
     const context = { build: jest.fn() };
@@ -67,10 +50,46 @@ describe('MadiAgentPipeline', () => {
     expect(executor.execute).not.toHaveBeenCalled();
   });
 
+  it('runs provider-neutral reasoning before planning', async () => {
+    const reasoning = {
+      reason: jest.fn().mockResolvedValue({
+        confidence: 1,
+        inferences: [{ type: 'test' }],
+        conclusions: [{ type: 'test' }],
+        recommendations: [],
+        proposedActions: [],
+      }),
+    };
+    const planner = {
+      plan: jest.fn().mockResolvedValue({ goal: request.input.content, steps: [] }),
+    };
+    const pipeline = new MadiAgentPipeline(
+      { resolve: jest.fn().mockResolvedValue(intent) },
+      { build: jest.fn().mockResolvedValue({ values: {} }) },
+      planner,
+      new MadiCapabilityRegistry(),
+      { select: jest.fn() },
+      { authorize: jest.fn() },
+      { execute: jest.fn() },
+      { verify: jest.fn() },
+      undefined,
+      reasoning,
+    );
+
+    const result = await pipeline.process(request);
+
+    expect(reasoning.reason).toHaveBeenCalledWith(
+      expect.objectContaining({ request, intent, context: { values: {} } }),
+    );
+    expect(result.reasoning).toEqual(expect.objectContaining({ confidence: 1 }));
+    expect(planner.plan).toHaveBeenCalledWith(
+      expect.objectContaining({ context: expect.objectContaining({ reasoning: result.reasoning }) }),
+    );
+  });
+
   it('executes a planned capability and verifies its output', async () => {
     const registry = new MadiCapabilityRegistry();
-    const cap = capability();
-    registry.register(cap);
+    registry.register(capability());
     const pipeline = new MadiAgentPipeline(
       { resolve: jest.fn().mockResolvedValue(intent) },
       { build: jest.fn().mockResolvedValue({ values: { session: 'x' } }) },
