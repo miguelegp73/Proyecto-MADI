@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
-describe('M.A.D.I. health endpoint (e2e)', () => {
+describe('M.A.D.I. HTTP API (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -28,5 +28,42 @@ describe('M.A.D.I. health endpoint (e2e)', () => {
         service: 'madi',
         version: '0.1.0',
       });
+  });
+
+  it('POST /interactions accepts the M.A.D.I. core contract', () => {
+    return request(app.getHttpServer())
+      .post('/interactions')
+      .send({
+        requestId: 'e2e-request-001',
+        timestamp: '2026-09-12T16:00:00.000Z',
+        source: {
+          applicationId: 'e2e-test',
+          interface: 'text',
+        },
+        input: {
+          type: 'text',
+          content: 'Hola M.A.D.I.',
+        },
+      })
+      .expect(201)
+      .expect((response) => {
+        expect(response.body.requestId).toBe('e2e-request-001');
+        expect(response.body.status).toBe('completed');
+        expect(response.body.data).toEqual([
+          {
+            type: 'acknowledgement',
+            message: 'Solicitud recibida por el núcleo de M.A.D.I. v0.1.',
+          },
+        ]);
+      });
+  });
+
+  it('POST /interactions rejects an invalid request', () => {
+    return request(app.getHttpServer())
+      .post('/interactions')
+      .send({
+        requestId: '',
+      })
+      .expect(400);
   });
 });
