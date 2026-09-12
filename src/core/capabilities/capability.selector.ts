@@ -8,17 +8,45 @@ export interface MadiCapabilitySelection {
 }
 
 export interface MadiCapabilitySelector {
-  select(intent: MadiIntent, capabilities: MadiCapability[]): Promise<MadiCapabilitySelection>;
+  select(
+    intent: MadiIntent,
+    capabilities: MadiCapability[],
+    requestedCapabilityId?: string,
+  ): Promise<MadiCapabilitySelection>;
 }
 
 export class BasicCapabilitySelector implements MadiCapabilitySelector {
-  async select(intent: MadiIntent, capabilities: MadiCapability[]): Promise<MadiCapabilitySelection> {
+  async select(
+    intent: MadiIntent,
+    capabilities: MadiCapability[],
+    requestedCapabilityId?: string,
+  ): Promise<MadiCapabilitySelection> {
+    if (requestedCapabilityId) {
+      const capability = capabilities.find(({ id }) => id === requestedCapabilityId);
+      return capability
+        ? {
+            capabilityId: capability.id,
+            reason: 'La planificación indicó explícitamente la capacidad.',
+            confidence: 1,
+          }
+        : {
+            reason: `La capacidad '${requestedCapabilityId}' no está disponible.`,
+            confidence: 0,
+          };
+    }
+
     if (intent.domain !== 'action') {
       return { reason: 'La intención no requiere una capacidad ejecutable.', confidence: 1 };
     }
+
     if (capabilities.length === 1) {
-      return { capabilityId: capabilities[0].id, reason: 'Única capacidad disponible.', confidence: 0.5 };
+      return {
+        capabilityId: capabilities[0].id,
+        reason: 'Única capacidad disponible.',
+        confidence: 0.5,
+      };
     }
+
     return { reason: 'No existe una selección determinista segura.', confidence: 0 };
   }
 }
