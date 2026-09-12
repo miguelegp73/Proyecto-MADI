@@ -43,7 +43,7 @@ export class MadiAgentPipeline {
       const context = await this.contextManager.build(request.context);
       const plan = await this.planner.plan({
         goal: request.input.content,
-        context: context.values,
+        context: { ...context.values, intent },
       });
       const execution: unknown[] = [];
 
