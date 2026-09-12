@@ -1,10 +1,24 @@
-import { MadiPlan, MadiPlanner, MadiPlanningInput } from '../../core/planning/planning.contract';
+import { MadiPlan, MadiPlanner, MadiPlanningInput } from './planning.contract';
 
 export class BasicPlanner implements MadiPlanner {
   async plan(input: MadiPlanningInput): Promise<MadiPlan> {
-    return {
-      goal: input.goal,
-      steps: [],
-    };
+    const intent = input.context.intent as { name?: string } | undefined;
+
+    if (intent?.name === 'information.madi.status') {
+      return {
+        goal: input.goal,
+        steps: [
+          {
+            id: 'status-001',
+            description: 'Consultar el estado operativo de M.A.D.I.',
+            capabilityId: 'madi.status',
+            operation: 'execute',
+            requiresAuthorization: false,
+          },
+        ],
+      };
+    }
+
+    return { goal: input.goal, steps: [] };
   }
 }
