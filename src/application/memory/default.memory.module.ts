@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { InMemoryMemoryStore } from '../../infrastructure/memory/in-memory.memory.store';
 import { MadiMemoryStore } from '../../core/memory/memory.contract';
+import { JsonFileMemoryStore } from '../../infrastructure/memory/json-file.memory.store';
 import { DefaultMemoryService } from './default.memory.service';
 
 export const MADI_MEMORY_STORE = Symbol('MADI_MEMORY_STORE');
@@ -9,7 +9,7 @@ export const MADI_MEMORY_STORE = Symbol('MADI_MEMORY_STORE');
   providers: [
     {
       provide: MADI_MEMORY_STORE,
-      useClass: InMemoryMemoryStore,
+      useFactory: (): MadiMemoryStore => new JsonFileMemoryStore(),
     },
     {
       provide: DefaultMemoryService,
