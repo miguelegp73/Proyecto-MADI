@@ -38,6 +38,7 @@ export interface MadiInteractionResponse {
   authorization?: {
     required: boolean;
     reason?: string;
+    approvalId?: string;
   };
   sources?: unknown[];
   warnings?: string[];
