@@ -8,13 +8,13 @@ const APPLICATIONS: Record<string, { command: string; args: string[]; label: str
   explorer: { command: 'explorer.exe', args: [], label: 'Explorador de archivos' },
 };
 
-/** Opens one of the explicitly allowlisted local Windows applications. Authorization is mandatory. */
+/** Opens one of the explicitly allowlisted local Windows applications without session authentication. */
 export class SystemOpenAppCapability implements MadiCapability {
   readonly id = 'system.open-app';
   readonly name = 'Abrir aplicación';
   readonly description = 'Abre una aplicación local de Windows de una lista segura y explícita.';
-  readonly risk = 'high' as const;
-  readonly requiresAuthorization = true;
+  readonly risk = 'low' as const;
+  readonly requiresAuthorization = false;
 
   async execute(request: MadiCapabilityRequest): Promise<MadiCapabilityResult> {
     const application = request.input?.application;
