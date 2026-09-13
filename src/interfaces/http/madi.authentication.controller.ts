@@ -1,7 +1,10 @@
 import { BadRequestException, Body, Controller, Inject, Post } from '@nestjs/common';
 import { MadiAuthenticationFlow } from '../../core/authentication/authentication.flow.contract';
 import { MadiCredentialAuthenticationRequest } from '../../core/authentication/credential.contract';
-import { MADI_AUTHENTICATION, MADI_AUTHENTICATED_CONVERSATION } from '../../application/authentication/authentication.module';
+import {
+  MADI_AUTHENTICATION,
+  MADI_AUTHENTICATED_CONVERSATION,
+} from '../../core/authentication/authentication.tokens';
 import { AuthenticatedConversationService } from '../../application/authentication/authenticated.conversation.service';
 
 @Controller('madi/auth')
