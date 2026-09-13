@@ -3,9 +3,9 @@ import { SystemOpenAppCapability } from './system.open.app.capability';
 describe('SystemOpenAppCapability', () => {
   const capability = new SystemOpenAppCapability();
 
-  it('requires authorization', () => {
-    expect(capability.risk).toBe('high');
-    expect(capability.requiresAuthorization).toBe(true);
+  it('does not require session authorization for allowlisted local applications', () => {
+    expect(capability.risk).toBe('low');
+    expect(capability.requiresAuthorization).toBe(false);
   });
 
   it('rejects non-allowlisted applications', async () => {
