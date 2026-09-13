@@ -30,7 +30,7 @@ describe('M.A.D.I. HTTP API (e2e)', () => {
       });
   });
 
-  it('POST /interactions accepts the M.A.D.I. core contract', () => {
+  it('POST /interactions processes a natural greeting through the current pipeline', () => {
     return request(app.getHttpServer())
       .post('/interactions')
       .send({
@@ -49,12 +49,8 @@ describe('M.A.D.I. HTTP API (e2e)', () => {
       .expect((response) => {
         expect(response.body.requestId).toBe('e2e-request-001');
         expect(response.body.status).toBe('completed');
-        expect(response.body.data).toEqual([
-          {
-            type: 'acknowledgement',
-            message: 'Solicitud recibida por el núcleo de M.A.D.I. v0.1.',
-          },
-        ]);
+        expect(response.body.intent.name).toBe('conversation.greeting');
+        expect(response.body.responseText).toBe('¡Hola! ¿En qué puedo ayudarte?');
       });
   });
 
