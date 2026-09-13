@@ -6,6 +6,7 @@ import { AuthenticatedConversationService } from './authenticated.conversation.s
 import { LocalCredentialAuthenticator } from '../../infrastructure/authentication/local.credential.authenticator';
 import { ConversationModule, MADI_CONVERSATION_MANAGER } from '../conversation/conversation.module';
 import { MadiConversationManager } from '../../core/conversation/conversation.contract';
+import { MadiAuthenticationController } from '../../interfaces/http/madi.authentication.controller';
 
 export const MADI_AUTHENTICATION = Symbol('MADI_AUTHENTICATION');
 export const MADI_SESSION_MANAGER = Symbol('MADI_SESSION_MANAGER');
@@ -13,6 +14,7 @@ export const MADI_AUTHENTICATED_CONVERSATION = Symbol('MADI_AUTHENTICATED_CONVER
 
 @Module({
   imports: [ConversationModule],
+  controllers: [MadiAuthenticationController],
   providers: [
     {
       provide: MADI_AUTHENTICATION,
