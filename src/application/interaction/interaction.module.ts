@@ -5,6 +5,7 @@ import { MADI_REASONING_PORT } from '../../core/reasoning/reasoning.token';
 import { StubReasoningAdapter } from '../../infrastructure/reasoning/stub.reasoning.adapter';
 import { InteractionController } from '../../interfaces/http/interaction.controller';
 import { MadiVoiceUiController } from '../../interfaces/http/madi.voice.ui.controller';
+import { MadiAuthorizationController } from '../../interfaces/http/madi.authorization.controller';
 import { BasicIntentResolver } from '../../core/intent/intent.resolver';
 import { DefaultContextManager } from '../context/default.context.manager';
 import { BasicPlanner } from '../planning/basic.planner';
@@ -34,7 +35,7 @@ import { MadiAuthorizationApprovalService } from '../../core/authorization/autho
 
 @Module({
   imports: [DefaultCapabilitiesModule, DefaultMemoryModule, ConversationModule, AuthenticationModule],
-  controllers: [InteractionController, MadiVoiceUiController],
+  controllers: [InteractionController, MadiVoiceUiController, MadiAuthorizationController],
   providers: [
     { provide: MADI_REASONING_PORT, useClass: StubReasoningAdapter },
     BasicIntentResolver,
@@ -42,11 +43,7 @@ import { MadiAuthorizationApprovalService } from '../../core/authorization/autho
     BasicPlanner,
     BasicCapabilitySelector,
     { provide: InMemoryAuthorizationApprovalService, useClass: InMemoryAuthorizationApprovalService },
-    {
-      provide: DefaultAuthorizationPolicy,
-      useFactory: (approvals: MadiAuthorizationApprovalService) => new DefaultAuthorizationPolicy(approvals),
-      inject: [InMemoryAuthorizationApprovalService],
-    },
+    { provide: DefaultAuthorizationPolicy, useFactory: (approvals: MadiAuthorizationApprovalService) => new DefaultAuthorizationPolicy(approvals), inject: [InMemoryAuthorizationApprovalService] },
     BasicVerifier,
     BasicReasoningEngine,
     BasicReasoningProvider,
