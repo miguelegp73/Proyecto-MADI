@@ -22,6 +22,7 @@ import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
 import { ResilientReasoningEngine } from '../reasoning/resilient.reasoning.engine';
 import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.reasoning.provider';
 import { OpenRouterReasoningProvider } from '../../infrastructure/reasoning/openrouter.reasoning.provider';
+import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway';
 import { NaturalResponseComposer } from '../response/natural.response.composer';
 import { ConversationModule, MADI_CONVERSATION_MANAGER } from '../conversation/conversation.module';
 import { AuthenticationModule, MADI_SESSION_MANAGER } from '../authentication/authentication.module';
@@ -59,7 +60,12 @@ import { MadiConversationManager } from '../../core/conversation/conversation.co
       useFactory: (orchestrator: MadiOrchestrator, composer: NaturalResponseComposer, sessions: MadiSessionManager, conversations: MadiConversationManager) => new InteractionService(orchestrator, composer, sessions, conversations),
       inject: [MadiOrchestrator, NaturalResponseComposer, MADI_SESSION_MANAGER, MADI_CONVERSATION_MANAGER],
     },
+    {
+      provide: ApplicationInterfaceGateway,
+      useFactory: (interactionService: InteractionService) => new ApplicationInterfaceGateway(interactionService),
+      inject: [InteractionService],
+    },
   ],
-  exports: [InteractionService],
+  exports: [InteractionService, ApplicationInterfaceGateway],
 })
 export class InteractionModule {}
