@@ -6,13 +6,13 @@ export class BasicIntentResolver implements MadiIntentResolver {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
-      .replace(/[.,!?;:]/g, ' ')
+      .replace(/[^a-z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
     if (!normalized) return { name: 'unknown.empty', domain: 'unknown', confidence: 1, requiresClarification: true };
     if (/^(hola|buenas|buen dia|buenas tardes|buenas noches)\b/.test(normalized)) return { name: 'conversation.greeting', domain: 'conversation', confidence: 0.99, requiresClarification: false };
-    if (/\b(que hora es|hora actual|hora)\b/.test(normalized)) return { name: 'information.time', domain: 'information', confidence: 0.96, requiresClarification: false };
+    if (/\b(que hora es|hora actual|hora|que hora|me dices la hora|decime la hora|dime la hora)\b/.test(normalized)) return { name: 'information.time', domain: 'information', confidence: 0.96, requiresClarification: false };
     if (/\b(que puedes hacer|tus capacidades|tus funciones|que sabes hacer)\b/.test(normalized)) return { name: 'information.madi.capabilities', domain: 'information', confidence: 0.97, requiresClarification: false };
     if (/\b(estado|status)\b.*\b(madi|m a d i)\b|\b(madi|m a d i)\b.*\b(estado|status)\b/.test(normalized)) return { name: 'information.madi.status', domain: 'information', confidence: 0.98, requiresClarification: false };
 
