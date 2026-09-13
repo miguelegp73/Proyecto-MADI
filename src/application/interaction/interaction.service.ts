@@ -7,7 +7,7 @@ import { MadiConversationManager } from '../../core/conversation/conversation.co
 import { MadiOrchestrator } from '../orchestration/madi.orchestrator';
 import { NaturalResponseComposer } from '../response/natural.response.composer';
 
-/** Executes interactions and, when an authenticated conversation is supplied, carries its bounded history. */
+/** Executes interactions and, when an authenticated conversation is supplied, carries its bounded history and scope. */
 export class InteractionService {
   constructor(
     private readonly orchestrator: MadiOrchestrator,
@@ -21,7 +21,7 @@ export class InteractionService {
     const sessionId = this.readMetadataString(request, 'sessionId');
     const conversation = await this.resolveConversation(sessionId, conversationId);
     const requestWithHistory = conversation
-      ? this.withConversationHistory(request, conversation.turns)
+      ? this.withConversationHistory(request, conversation.turns, conversation.conversationId, conversation.sessionId)
       : request;
 
     if (conversation) {
@@ -72,11 +72,15 @@ export class InteractionService {
   private withConversationHistory(
     request: MadiInteractionRequest,
     turns: readonly { role: 'user' | 'assistant'; content: string }[],
+    conversationId: string,
+    sessionId: string,
   ): MadiInteractionRequest {
     return {
       ...request,
       context: {
         ...(request.context ?? {}),
+        conversationId,
+        sessionId,
         conversation: {
           turns: turns.slice(-12).map((turn) => ({ role: turn.role, content: turn.content })),
         },
