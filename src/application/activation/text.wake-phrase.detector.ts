@@ -29,8 +29,7 @@ export class TextWakePhraseDetector {
   }
 
   private containsNameToken(text: string, name: string): boolean {
-    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`(?:^|\\s)${escaped}(?:$|\\s)`).test(text);
+    return text === name || text.startsWith(`${name} `) || text.endsWith(` ${name}`) || text.includes(` ${name} `);
   }
 
   private normalize(value: string): string {
@@ -40,6 +39,7 @@ export class TextWakePhraseDetector {
       .toLowerCase()
       .replace(/[.,!?;:]/g, ' ')
       .replace(/\s+/g, ' ')
-      .trim();
+      .trim()
+      .replace(/\bm\s+a\s+d\s+i\b/g, 'madi');
   }
 }
