@@ -22,12 +22,14 @@ import { BasicReasoningEngine } from '../reasoning/basic.reasoning.engine';
 import { ResilientReasoningEngine } from '../reasoning/resilient.reasoning.engine';
 import { BasicReasoningProvider } from '../../infrastructure/reasoning/basic.reasoning.provider';
 import { OpenRouterReasoningProvider } from '../../infrastructure/reasoning/openrouter.reasoning.provider';
-import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway';
 import { NaturalResponseComposer } from '../response/natural.response.composer';
-import { ConversationModule } from '../conversation/conversation.module';
+import { ConversationModule, MADI_CONVERSATION_MANAGER } from '../conversation/conversation.module';
+import { AuthenticationModule, MADI_SESSION_MANAGER } from '../authentication/authentication.module';
+import { MadiSessionManager } from '../../core/authentication/session.contract';
+import { MadiConversationManager } from '../../core/conversation/conversation.contract';
 
 @Module({
-  imports: [DefaultCapabilitiesModule, DefaultMemoryModule, ConversationModule],
+  imports: [DefaultCapabilitiesModule, DefaultMemoryModule, ConversationModule, AuthenticationModule],
   controllers: [InteractionController, MadiVoiceUiController],
   providers: [
     { provide: MADI_REASONING_PORT, useClass: StubReasoningAdapter },
@@ -54,11 +56,10 @@ import { ConversationModule } from '../conversation/conversation.module';
     MadiOrchestrator,
     {
       provide: InteractionService,
-      useFactory: (orchestrator: MadiOrchestrator, composer: NaturalResponseComposer) => new InteractionService(orchestrator, composer),
-      inject: [MadiOrchestrator, NaturalResponseComposer],
+      useFactory: (orchestrator: MadiOrchestrator, composer: NaturalResponseComposer, sessions: MadiSessionManager, conversations: MadiConversationManager) => new InteractionService(orchestrator, composer, sessions, conversations),
+      inject: [MadiOrchestrator, NaturalResponseComposer, MADI_SESSION_MANAGER, MADI_CONVERSATION_MANAGER],
     },
-    { provide: ApplicationInterfaceGateway, useFactory: (interactionService: InteractionService) => new ApplicationInterfaceGateway(interactionService), inject: [InteractionService] },
   ],
-  exports: [InteractionService, ApplicationInterfaceGateway],
+  exports: [InteractionService],
 })
 export class InteractionModule {}
