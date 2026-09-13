@@ -36,8 +36,13 @@ describe('OpenRouterReasoningProvider', () => {
         source: { applicationId: 'test', interface: 'text' },
         input: { type: 'text', content: 'Hola' },
       },
-      intent: { name: 'conversation.greeting', confidence: 1 },
-      context: { values: {}, timestamp: '2026-09-12T00:00:00Z' },
+      intent: {
+        name: 'conversation.greeting',
+        domain: 'conversation',
+        confidence: 1,
+        requiresClarification: false,
+      },
+      context: { values: {} },
     });
 
     expect(result.confidence).toBe(0.9);
