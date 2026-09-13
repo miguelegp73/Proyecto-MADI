@@ -7,10 +7,11 @@ import { LocalCredentialAuthenticator } from '../../infrastructure/authenticatio
 import { ConversationModule, MADI_CONVERSATION_MANAGER } from '../conversation/conversation.module';
 import { MadiConversationManager } from '../../core/conversation/conversation.contract';
 import { MadiAuthenticationController } from '../../interfaces/http/madi.authentication.controller';
-
-export const MADI_AUTHENTICATION = Symbol('MADI_AUTHENTICATION');
-export const MADI_SESSION_MANAGER = Symbol('MADI_SESSION_MANAGER');
-export const MADI_AUTHENTICATED_CONVERSATION = Symbol('MADI_AUTHENTICATED_CONVERSATION');
+import {
+  MADI_AUTHENTICATION,
+  MADI_SESSION_MANAGER,
+  MADI_AUTHENTICATED_CONVERSATION,
+} from '../../core/authentication/authentication.tokens';
 
 @Module({
   imports: [ConversationModule],
