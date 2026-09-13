@@ -10,29 +10,24 @@ Proyecto independiente de inteligencia y asistencia, diseñado desde el inicio p
 
 ## Estado actual
 
-La base de M.A.D.I. está implementada y verificada mediante build, pruebas unitarias y pruebas E2E del núcleo HTTP. Incluye:
+La base de M.A.D.I. está implementada con núcleo NestJS, interfaz de navegador, micrófono, activación natural, autenticación local por credencial, sesiones, conversaciones, memoria persistente, voz de respuesta, reasoning desacoplado, capacidades, autorización, verificación y agent loop acotado.
 
-- núcleo NestJS ejecutable;
-- interfaz visual de navegador;
-- entrada por micrófono mediante las APIs del navegador;
-- activación por variantes naturales de "Hola M.A.D.I.";
-- autenticación local por credencial;
-- sesiones y conversaciones en memoria;
-- memoria local persistente para interacciones;
-- respuestas habladas mediante síntesis del navegador;
-- reasoning desacoplado con fallback local y OpenRouter opcional;
-- capacidades básicas de estado, hora y consulta de capacidades;
-- autorización y verificación;
-- agent loop acotado;
-- primera capacidad sensible `system.open-url`, protegida por autorización.
+Capacidades reales disponibles en v0.1:
 
-El reconocimiento biométrico real con Whispeak, el control avanzado del PC, el lip-sync profesional y las integraciones externas siguen siendo etapas posteriores. No se simulan como funcionalidades terminadas.
+- estado de M.A.D.I.;
+- hora local;
+- consulta de capacidades;
+- apertura de URLs HTTP/HTTPS con autorización explícita;
+- apertura de aplicaciones Windows de una lista permitida con autorización explícita: Calculadora, Bloc de notas, Paint y Explorador.
+
+La wake phrase activa la interacción, pero no autentica al usuario. Las operaciones sensibles requieren autorización independiente.
 
 ## Ejecutar localmente
 
 ### Requisitos
 
 - Node.js 22.
+- Windows para las capacidades de aplicaciones locales.
 - Navegador moderno con soporte de micrófono y Speech Recognition.
 
 ### Instalación
@@ -61,44 +56,46 @@ PORT=3000
 npm run start:dev
 ```
 
-Después abrir:
+Después abrir `http://localhost:3000/madi`.
 
-`http://localhost:3000/madi`
+## Prueba rápida
 
-La primera vez, el navegador solicitará permiso para utilizar el micrófono.
-
-## Primera prueba
-
-1. Crear `.env` con una credencial local propia.
-2. Arrancar M.A.D.I. con `npm run start:dev`.
+1. Crear `.env`.
+2. Ejecutar `npm run start:dev`.
 3. Abrir `http://localhost:3000/madi`.
-4. Autenticarse mediante la credencial local cuando la interfaz lo solicite.
+4. Autenticarse mediante la credencial local.
 5. Decir **"Hola M.A.D.I."**.
-6. Probar frases como:
+6. Probar:
    - "¿Cuál es el estado de M.A.D.I.?"
    - "¿Qué hora es?"
    - "¿Qué puedes hacer?"
-
-La voz y el avatar actuales pertenecen a la interfaz de navegador. El avatar ya dispone de estados y animación, pero el lip-sync profesional por fonemas/visemas todavía no está terminado.
+   - "Abre https://www.google.com" — M.A.D.I. debe pedir confirmación antes de abrirlo.
+   - "Abre la calculadora" — M.A.D.I. debe pedir confirmación antes de abrirla.
 
 ## API local
 
 - `GET /health` — estado del servicio.
-- `POST /interactions` — frontera HTTP del núcleo de interacción.
+- `POST /interactions` — frontera HTTP del núcleo.
+- `POST /madi/interaction` — flujo de interacción que prepara autorización para acciones protegidas.
 - `POST /madi/auth/credential` — autenticación por credencial local.
-- `GET /madi` — interfaz visual/voz.
+- `POST /madi/auth/approve` — confirma una autorización temporal.
+- `GET /madi` — interfaz visual y de voz.
 
-## IA
+## IA y voz
 
-OpenRouter es opcional. Si `OPENROUTER_API_KEY` no está configurada, M.A.D.I. conserva un proveedor local de fallback. El núcleo no depende conceptualmente de un proveedor concreto.
+OpenRouter es opcional. Sin `OPENROUTER_API_KEY`, M.A.D.I. conserva un proveedor local de fallback.
 
-## Seguridad de v0.1
+La interfaz usa síntesis de voz del navegador y reconocimiento de voz disponible en el navegador. El avatar actual tiene estados y animación; el lip-sync profesional por fonemas/visemas y una voz comercial específica requieren proveedores/configuración externos y no se simulan como terminados.
 
-La wake phrase solamente activa la interacción; no constituye autenticación. La identidad y la autorización están separadas. Las capacidades sensibles deben pasar por la política de autorización antes de ejecutarse.
+El reconocimiento biométrico real con Whispeak también queda separado de la credencial local y requiere las credenciales/endpoints de la aplicación Whispeak antes de activarse.
 
-La credencial local es un mecanismo de arranque para uso personal. No debe considerarse todavía una infraestructura definitiva de usuarios ni una autenticación biométrica de producción.
+## Seguridad
 
-## Verificación del proyecto
+Las capacidades sensibles nunca deben quedar autorizadas solamente por reconocer una wake phrase. La autorización se valida en el backend y los tokens de aprobación son temporales, ligados a sesión, capacidad y operación, y de un solo uso.
+
+La capacidad de aplicaciones locales usa una lista explícita y no acepta comandos arbitrarios de shell. No permite ejecutar PowerShell, CMD ni programas no registrados.
+
+## Verificación
 
 ```bash
 npm run build
@@ -106,26 +103,29 @@ npm test -- --runInBand
 npm run test:e2e -- --runInBand
 ```
 
-El repositorio mantiene CI para ejecutar estas verificaciones automáticamente.
+CI ejecuta estas verificaciones automáticamente.
 
-## Próximas etapas evolutivas
+## Fuera de v0.1
 
-- reconocimiento biométrico de voz real y confiable con un proveedor especializado;
-- credencial y gestión real de usuarios/permisos;
-- persistencia robusta de sesiones y conversaciones;
-- lip-sync fonético/visémico sincronizado con TTS;
-- herramientas locales para controlar PC y aplicaciones, siempre protegidas por autorización;
-- navegación web y acceso controlado a recursos externos;
+Estas capacidades no se deben considerar terminadas todavía:
+
+- biometría vocal real de producción;
+- gestión completa de múltiples usuarios y permisos;
+- persistencia robusta distribuida;
+- lip-sync profesional;
+- control general del PC y ejecución arbitraria de programas;
+- lectura/escritura general de archivos;
+- navegación web autónoma más allá de acciones explícitas;
 - integraciones con SicherERP e Inspector IA;
-- agentes autónomos acotados y verificables;
-- instalador y arranque automático del asistente.
+- agentes autónomos de mayor alcance;
+- instalador y arranque automático.
 
-## Principios de desarrollo
+## Principios
 
-- La arquitectura actual y el código del repositorio son la fuente de verdad.
-- No rehacer ni romper funcionalidades que ya funcionan.
+- La arquitectura y el código del repositorio son la fuente de verdad.
+- No romper funcionalidades existentes.
 - Cambios pequeños, verificables y con commits descriptivos.
-- Separación clara entre núcleo, aplicación, interfaces e infraestructura.
+- Separación entre núcleo, aplicación, interfaces e infraestructura.
 - Proveedores externos desacoplados del núcleo.
-- Secretos únicamente mediante configuración local/segura.
+- Secretos únicamente mediante configuración segura.
 - M.A.D.I. permanece independiente de SicherERP.
