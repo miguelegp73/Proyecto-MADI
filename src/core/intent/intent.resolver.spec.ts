@@ -7,8 +7,12 @@ describe('BasicIntentResolver', () => {
     await expect(resolver.resolve('Hola M.A.D.I.')).resolves.toEqual({ name: 'conversation.greeting', domain: 'conversation', confidence: 0.99, requiresClarification: false });
   });
 
-  it('classifies a local time request', async () => {
-    await expect(resolver.resolve('M.A.D.I., ¿qué hora es?')).resolves.toEqual({ name: 'information.time', domain: 'information', confidence: 0.96, requiresClarification: false });
+  it('classifies natural local time requests', async () => {
+    const expected = { name: 'information.time', domain: 'information', confidence: 0.96, requiresClarification: false };
+    await expect(resolver.resolve('M.A.D.I., ¿qué hora es?')).resolves.toEqual(expected);
+    await expect(resolver.resolve('Qué hora es')).resolves.toEqual(expected);
+    await expect(resolver.resolve('¿Me dices la hora?')).resolves.toEqual(expected);
+    await expect(resolver.resolve('Decime la hora')).resolves.toEqual(expected);
   });
 
   it('classifies an authorized local application action', async () => {
