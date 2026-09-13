@@ -16,6 +16,16 @@ export class BasicIntentResolver implements MadiIntentResolver {
     if (/\b(que puedes hacer|tus capacidades|tus funciones|que sabes hacer)\b/.test(normalized)) return { name: 'information.madi.capabilities', domain: 'information', confidence: 0.97, requiresClarification: false };
     if (/\b(estado|status)\b.*\b(madi|m a d i)\b|\b(madi|m a d i)\b.*\b(estado|status)\b/.test(normalized)) return { name: 'information.madi.status', domain: 'information', confidence: 0.98, requiresClarification: false };
 
+    if (/\b(abrir|abre|abri|navega|navegar|ir a|entra a|entrar a)\b/.test(normalized)) {
+      const hasUrl = /\bhttps?:\/\/[^\s]+/i.test(input);
+      return {
+        name: 'action.open-url',
+        domain: 'action',
+        confidence: hasUrl ? 0.98 : 0.82,
+        requiresClarification: !hasUrl,
+      };
+    }
+
     return { name: 'unknown.unclassified', domain: 'unknown', confidence: 0, requiresClarification: true };
   }
 }
