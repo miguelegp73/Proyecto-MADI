@@ -8,10 +8,10 @@ describe('MadiVoiceUiController lip-sync integration hooks', () => {
     expect(html).toContain('class="mouth"');
   });
 
-  it('exposes a stable target for future viseme application without changing the interaction API', () => {
+  it('exposes a stable avatar target and speech/listening state transitions', () => {
     const html = new MadiVoiceUiController().render();
     expect(html).toContain('id="avatar"');
     expect(html).toContain("setState('speaking'");
-    expect(html).toContain("setState(active?'listening'");
+    expect(html).toContain("setState('listening',active?'Escuchando a M.A.D.I.…':'En espera — di “M.A.D.I.”')");
   });
 });
