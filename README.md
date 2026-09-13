@@ -6,81 +6,126 @@ Proyecto independiente de inteligencia y asistencia, diseñado desde el inicio p
 
 ## Versión
 
-`v0.1` — Fundación ejecutable.
+`v0.1` — Fundación ejecutable y primer entorno de uso personal.
 
 ## Estado actual
 
-M.A.D.I. ya dispone de un núcleo NestJS ejecutable, interacción HTTP, interfaz visual/voz de navegador, reasoning provider-neutral con fallback local y OpenRouter opcional, capacidades básicas, autorización/verificación, agent loop acotado, sesiones, conversación y una credencial local de arranque.
+La base de M.A.D.I. está implementada y verificada mediante build, pruebas unitarias y pruebas E2E del núcleo HTTP. Incluye:
+
+- núcleo NestJS ejecutable;
+- interfaz visual de navegador;
+- entrada por micrófono mediante las APIs del navegador;
+- activación por variantes naturales de "Hola M.A.D.I.";
+- autenticación local por credencial;
+- sesiones y conversaciones en memoria;
+- memoria local persistente para interacciones;
+- respuestas habladas mediante síntesis del navegador;
+- reasoning desacoplado con fallback local y OpenRouter opcional;
+- capacidades básicas de estado, hora y consulta de capacidades;
+- autorización y verificación;
+- agent loop acotado;
+- primera capacidad sensible `system.open-url`, protegida por autorización.
+
+El reconocimiento biométrico real con Whispeak, el control avanzado del PC, el lip-sync profesional y las integraciones externas siguen siendo etapas posteriores. No se simulan como funcionalidades terminadas.
 
 ## Ejecutar localmente
 
-1. Instalar Node.js 22.
-2. Instalar dependencias:
+### Requisitos
+
+- Node.js 22.
+- Navegador moderno con soporte de micrófono y Speech Recognition.
+
+### Instalación
 
 ```bash
 npm install
 ```
 
-3. Copiar `.env.example` como `.env` y cambiar `MADI_CREDENTIAL_SECRET` por una credencial local propia.
-4. Iniciar en desarrollo:
+### Configuración local
+
+Copiar `.env.example` como `.env` y establecer una credencial propia:
+
+```text
+MADI_CREDENTIAL_TYPE=local
+MADI_CREDENTIAL_SECRET=TU_CREDENCIAL_LOCAL
+MADI_USER_ID=miguel
+MADI_DISPLAY_NAME=Miguel
+PORT=3000
+```
+
+**No subir `.env` al repositorio ni compartir la credencial.**
+
+### Arranque
 
 ```bash
 npm run start:dev
 ```
 
-5. Abrir en el navegador:
+Después abrir:
 
 `http://localhost:3000/madi`
 
-También está disponible:
+La primera vez, el navegador solicitará permiso para utilizar el micrófono.
 
-`GET /health`
+## Primera prueba
 
-`POST /interactions`
+1. Crear `.env` con una credencial local propia.
+2. Arrancar M.A.D.I. con `npm run start:dev`.
+3. Abrir `http://localhost:3000/madi`.
+4. Autenticarse mediante la credencial local cuando la interfaz lo solicite.
+5. Decir **"Hola M.A.D.I."**.
+6. Probar frases como:
+   - "¿Cuál es el estado de M.A.D.I.?"
+   - "¿Qué hora es?"
+   - "¿Qué puedes hacer?"
 
-`POST /madi/auth/credential`
+La voz y el avatar actuales pertenecen a la interfaz de navegador. El avatar ya dispone de estados y animación, pero el lip-sync profesional por fonemas/visemas todavía no está terminado.
 
-## Autenticación local de arranque
+## API local
 
-La autenticación por credencial de v0.1 utiliza variables de entorno y sirve como adaptador temporal. No representa todavía el mecanismo definitivo de identidad biométrica ni una infraestructura de usuarios multiusuario.
-
-Variables:
-
-```text
-MADI_CREDENTIAL_TYPE=local
-MADI_CREDENTIAL_SECRET=...
-MADI_USER_ID=miguel
-MADI_DISPLAY_NAME=Miguel
-```
-
-Nunca subir `.env` ni secretos reales al repositorio.
+- `GET /health` — estado del servicio.
+- `POST /interactions` — frontera HTTP del núcleo de interacción.
+- `POST /madi/auth/credential` — autenticación por credencial local.
+- `GET /madi` — interfaz visual/voz.
 
 ## IA
 
-OpenRouter es opcional. Si `OPENROUTER_API_KEY` no está configurada, M.A.D.I. conserva un proveedor local de fallback. M.A.D.I. no depende conceptualmente de ningún proveedor concreto.
+OpenRouter es opcional. Si `OPENROUTER_API_KEY` no está configurada, M.A.D.I. conserva un proveedor local de fallback. El núcleo no depende conceptualmente de un proveedor concreto.
 
 ## Seguridad de v0.1
 
-La interfaz de wake phrase activa la interacción, pero no autentica al usuario. Las capacidades sensibles siguen separadas de la identidad y requieren autorización según las políticas existentes.
+La wake phrase solamente activa la interacción; no constituye autenticación. La identidad y la autorización están separadas. Las capacidades sensibles deben pasar por la política de autorización antes de ejecutarse.
+
+La credencial local es un mecanismo de arranque para uso personal. No debe considerarse todavía una infraestructura definitiva de usuarios ni una autenticación biométrica de producción.
+
+## Verificación del proyecto
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run test:e2e -- --runInBand
+```
+
+El repositorio mantiene CI para ejecutar estas verificaciones automáticamente.
+
+## Próximas etapas evolutivas
+
+- reconocimiento biométrico de voz real y confiable con un proveedor especializado;
+- credencial y gestión real de usuarios/permisos;
+- persistencia robusta de sesiones y conversaciones;
+- lip-sync fonético/visémico sincronizado con TTS;
+- herramientas locales para controlar PC y aplicaciones, siempre protegidas por autorización;
+- navegación web y acceso controlado a recursos externos;
+- integraciones con SicherERP e Inspector IA;
+- agentes autónomos acotados y verificables;
+- instalador y arranque automático del asistente.
 
 ## Principios de desarrollo
 
-- Arquitectura modular y extensible.
-- Separación clara entre núcleo, interfaces e infraestructura.
-- Proveedores de IA desacoplados del núcleo.
-- Configuración mediante variables de entorno; nunca almacenar secretos en el repositorio.
-- Cambios pequeños, comprobables y con commits funcionales.
-- Compatibilidad futura con SicherERP sin acoplar M.A.D.I. a SicherERP.
-- Preservar siempre lo que ya funciona.
-
-## Pendientes para una versión de uso personal más completa
-
-- Reconocimiento biométrico de voz real y confiable.
-- Credencial definitiva y gestión real de usuarios/permisos.
-- Persistencia de sesiones, conversaciones y memoria.
-- Integración real del sessionId con cada interacción.
-- Lip-sync fonético/visémico real conectado al audio TTS.
-- Herramientas locales para controlar PC y aplicaciones, protegidas por autorización.
-- Navegación web y acceso controlado a recursos externos.
-- Integraciones con SicherERP e Inspector IA.
-- Instalador/arranque del asistente en el equipo.
+- La arquitectura actual y el código del repositorio son la fuente de verdad.
+- No rehacer ni romper funcionalidades que ya funcionan.
+- Cambios pequeños, verificables y con commits descriptivos.
+- Separación clara entre núcleo, aplicación, interfaces e infraestructura.
+- Proveedores externos desacoplados del núcleo.
+- Secretos únicamente mediante configuración local/segura.
+- M.A.D.I. permanece independiente de SicherERP.
