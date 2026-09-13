@@ -10,6 +10,7 @@ import { DefaultContextManager } from '../context/default.context.manager';
 import { BasicPlanner } from '../planning/basic.planner';
 import { BasicCapabilitySelector } from '../../core/capabilities/capability.selector';
 import { DefaultAuthorizationPolicy } from '../authorization/default.authorization.policy';
+import { InMemoryAuthorizationApprovalService } from '../authorization/in-memory.authorization.approval.service';
 import { BasicVerifier } from '../verification/basic.verifier';
 import { MadiAgentPipeline } from '../pipeline/madi.agent.pipeline';
 import { DefaultMemoryModule, MADI_MEMORY_STORE } from '../memory/default.memory.module';
@@ -29,6 +30,7 @@ import { AuthenticationModule } from '../authentication/authentication.module';
 import { MADI_SESSION_MANAGER } from '../../core/authentication/authentication.tokens';
 import { MadiSessionManager } from '../../core/authentication/session.contract';
 import { MadiConversationManager } from '../../core/conversation/conversation.contract';
+import { MadiAuthorizationApprovalService } from '../../core/authorization/authorization.approval.contract';
 
 @Module({
   imports: [DefaultCapabilitiesModule, DefaultMemoryModule, ConversationModule, AuthenticationModule],
@@ -39,7 +41,12 @@ import { MadiConversationManager } from '../../core/conversation/conversation.co
     { provide: DefaultContextManager, useFactory: (memory: MadiMemoryStore) => new DefaultContextManager(memory), inject: [MADI_MEMORY_STORE] },
     BasicPlanner,
     BasicCapabilitySelector,
-    DefaultAuthorizationPolicy,
+    { provide: InMemoryAuthorizationApprovalService, useClass: InMemoryAuthorizationApprovalService },
+    {
+      provide: DefaultAuthorizationPolicy,
+      useFactory: (approvals: MadiAuthorizationApprovalService) => new DefaultAuthorizationPolicy(approvals),
+      inject: [InMemoryAuthorizationApprovalService],
+    },
     BasicVerifier,
     BasicReasoningEngine,
     BasicReasoningProvider,
@@ -67,6 +74,6 @@ import { MadiConversationManager } from '../../core/conversation/conversation.co
       inject: [InteractionService],
     },
   ],
-  exports: [InteractionService, ApplicationInterfaceGateway],
+  exports: [InteractionService, ApplicationInterfaceGateway, InMemoryAuthorizationApprovalService],
 })
 export class InteractionModule {}
