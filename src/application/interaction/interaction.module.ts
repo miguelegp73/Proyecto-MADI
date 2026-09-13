@@ -25,7 +25,8 @@ import { OpenRouterReasoningProvider } from '../../infrastructure/reasoning/open
 import { ApplicationInterfaceGateway } from '../interface/madi.interface.gateway';
 import { NaturalResponseComposer } from '../response/natural.response.composer';
 import { ConversationModule, MADI_CONVERSATION_MANAGER } from '../conversation/conversation.module';
-import { AuthenticationModule, MADI_SESSION_MANAGER } from '../authentication/authentication.module';
+import { AuthenticationModule } from '../authentication/authentication.module';
+import { MADI_SESSION_MANAGER } from '../../core/authentication/authentication.tokens';
 import { MadiSessionManager } from '../../core/authentication/session.contract';
 import { MadiConversationManager } from '../../core/conversation/conversation.contract';
 
