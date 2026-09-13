@@ -13,6 +13,36 @@ export class BasicPlanner implements MadiPlanner {
     if (intent?.name === 'information.madi.capabilities') {
       return { goal: input.goal, steps: [{ id: 'capabilities-001', description: 'Consultar las capacidades registradas de M.A.D.I.', capabilityId: 'madi.capabilities', operation: 'execute', requiresAuthorization: false }] };
     }
+    if (intent?.name === 'action.open-url') {
+      const match = input.goal.match(/\bhttps?:\/\/[^\s]+/i);
+      const url = match?.[0]?.replace(/[.,!?;:]+$/, '');
+
+      if (!url) {
+        return {
+          goal: input.goal,
+          steps: [{
+            id: 'open-url-001',
+            description: 'Abrir el sitio web solicitado.',
+            capabilityId: 'system.open-url',
+            operation: 'execute',
+            requiresAuthorization: true,
+          }],
+        };
+      }
+
+      return {
+        goal: input.goal,
+        steps: [{
+          id: 'open-url-001',
+          description: `Abrir el sitio web ${url}.`,
+          capabilityId: 'system.open-url',
+          operation: 'execute',
+          input: { url },
+          requiresAuthorization: true,
+          expected: { openUrl: url },
+        }],
+      };
+    }
 
     return { goal: input.goal, steps: [] };
   }
