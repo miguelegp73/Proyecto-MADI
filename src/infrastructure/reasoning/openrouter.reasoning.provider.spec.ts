@@ -30,9 +30,14 @@ describe('OpenRouterReasoningProvider', () => {
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
 
     const result = await provider.reason({
-      request: { requestId: 'r1', timestamp: '2026-09-12T00:00:00Z', source: { applicationId: 'test', interface: 'text' }, input: { type: 'text', content: 'Hola' } },
-      intent: { name: 'conversation.greeting', confidence: 1, entities: {} },
-      context: { values: {}, source: 'test', timestamp: '2026-09-12T00:00:00Z' },
+      request: {
+        requestId: 'r1',
+        timestamp: '2026-09-12T00:00:00Z',
+        source: { applicationId: 'test', interface: 'text' },
+        input: { type: 'text', content: 'Hola' },
+      },
+      intent: { name: 'conversation.greeting', confidence: 1 },
+      context: { values: {}, timestamp: '2026-09-12T00:00:00Z' },
     });
 
     expect(result.confidence).toBe(0.9);
