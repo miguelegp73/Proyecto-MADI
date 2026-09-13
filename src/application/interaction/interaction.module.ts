@@ -6,6 +6,7 @@ import { StubReasoningAdapter } from '../../infrastructure/reasoning/stub.reason
 import { InteractionController } from '../../interfaces/http/interaction.controller';
 import { MadiVoiceUiController } from '../../interfaces/http/madi.voice.ui.controller';
 import { MadiAuthorizationController } from '../../interfaces/http/madi.authorization.controller';
+import { MadiInteractionAuthorizationController } from '../../interfaces/http/madi.interaction.authorization.controller';
 import { BasicIntentResolver } from '../../core/intent/intent.resolver';
 import { DefaultContextManager } from '../context/default.context.manager';
 import { BasicPlanner } from '../planning/basic.planner';
@@ -35,7 +36,7 @@ import { MadiAuthorizationApprovalService } from '../../core/authorization/autho
 
 @Module({
   imports: [DefaultCapabilitiesModule, DefaultMemoryModule, ConversationModule, AuthenticationModule],
-  controllers: [InteractionController, MadiVoiceUiController, MadiAuthorizationController],
+  controllers: [InteractionController, MadiVoiceUiController, MadiAuthorizationController, MadiInteractionAuthorizationController],
   providers: [
     { provide: MADI_REASONING_PORT, useClass: StubReasoningAdapter },
     BasicIntentResolver,
@@ -49,27 +50,11 @@ import { MadiAuthorizationApprovalService } from '../../core/authorization/autho
     BasicReasoningProvider,
     OpenRouterReasoningProvider,
     NaturalResponseComposer,
-    {
-      provide: ResilientReasoningEngine,
-      useFactory: (openRouter: OpenRouterReasoningProvider, localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) => new ResilientReasoningEngine([openRouter, localProvider], fallback),
-      inject: [OpenRouterReasoningProvider, BasicReasoningProvider, BasicReasoningEngine],
-    },
-    {
-      provide: MadiAgentPipeline,
-      useFactory: (intentResolver: BasicIntentResolver, contextManager: DefaultContextManager, planner: BasicPlanner, registry: MadiCapabilityRegistry, selector: BasicCapabilitySelector, authorization: DefaultAuthorizationPolicy, executor: MadiCapabilityExecutor, verifier: BasicVerifier, memory: MadiMemoryStore, reasoningEngine: MadiReasoningEngine) => new MadiAgentPipeline(intentResolver, contextManager, planner, registry, selector, authorization, executor, verifier, memory, reasoningEngine),
-      inject: [BasicIntentResolver, DefaultContextManager, BasicPlanner, MADI_CAPABILITY_REGISTRY, BasicCapabilitySelector, DefaultAuthorizationPolicy, MADI_CAPABILITY_EXECUTOR, BasicVerifier, MADI_MEMORY_STORE, ResilientReasoningEngine],
-    },
+    { provide: ResilientReasoningEngine, useFactory: (openRouter: OpenRouterReasoningProvider, localProvider: BasicReasoningProvider, fallback: BasicReasoningEngine) => new ResilientReasoningEngine([openRouter, localProvider], fallback), inject: [OpenRouterReasoningProvider, BasicReasoningProvider, BasicReasoningEngine] },
+    { provide: MadiAgentPipeline, useFactory: (intentResolver: BasicIntentResolver, contextManager: DefaultContextManager, planner: BasicPlanner, registry: MadiCapabilityRegistry, selector: BasicCapabilitySelector, authorization: DefaultAuthorizationPolicy, executor: MadiCapabilityExecutor, verifier: BasicVerifier, memory: MadiMemoryStore, reasoningEngine: MadiReasoningEngine) => new MadiAgentPipeline(intentResolver, contextManager, planner, registry, selector, authorization, executor, verifier, memory, reasoningEngine), inject: [BasicIntentResolver, DefaultContextManager, BasicPlanner, MADI_CAPABILITY_REGISTRY, BasicCapabilitySelector, DefaultAuthorizationPolicy, MADI_CAPABILITY_EXECUTOR, BasicVerifier, MADI_MEMORY_STORE, ResilientReasoningEngine] },
     MadiOrchestrator,
-    {
-      provide: InteractionService,
-      useFactory: (orchestrator: MadiOrchestrator, composer: NaturalResponseComposer, sessions: MadiSessionManager, conversations: MadiConversationManager) => new InteractionService(orchestrator, composer, sessions, conversations),
-      inject: [MadiOrchestrator, NaturalResponseComposer, MADI_SESSION_MANAGER, MADI_CONVERSATION_MANAGER],
-    },
-    {
-      provide: ApplicationInterfaceGateway,
-      useFactory: (interactionService: InteractionService) => new ApplicationInterfaceGateway(interactionService),
-      inject: [InteractionService],
-    },
+    { provide: InteractionService, useFactory: (orchestrator: MadiOrchestrator, composer: NaturalResponseComposer, sessions: MadiSessionManager, conversations: MadiConversationManager) => new InteractionService(orchestrator, composer, sessions, conversations), inject: [MadiOrchestrator, NaturalResponseComposer, MADI_SESSION_MANAGER, MADI_CONVERSATION_MANAGER] },
+    { provide: ApplicationInterfaceGateway, useFactory: (interactionService: InteractionService) => new ApplicationInterfaceGateway(interactionService), inject: [InteractionService] },
   ],
   exports: [InteractionService, ApplicationInterfaceGateway, InMemoryAuthorizationApprovalService],
 })
